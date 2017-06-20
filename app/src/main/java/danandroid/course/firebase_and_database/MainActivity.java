@@ -13,23 +13,22 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.os.Bundle;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
-
-import android.widget.TextView;
 
 import com.firebase.ui.auth.AuthUI;
+import com.firebase.ui.auth.IdpResponse;
 import com.google.android.gms.common.Scopes;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import danandroid.course.firebase_and_database.models.User;
 
 public class MainActivity extends AppCompatActivity {
     //properties:
@@ -53,57 +52,62 @@ public class MainActivity extends AppCompatActivity {
      */
     private ViewPager mViewPager;
 
-    FirebaseAuth.AuthStateListener mAuthLitener = new FirebaseAuth.AuthStateListener() {
+    FirebaseAuth.AuthStateListener mAuthListener = new FirebaseAuth.AuthStateListener() {
         @Override
         public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
-            //if user == null
+
             user = firebaseAuth.getCurrentUser();
             if (user == null){
                 List<AuthUI.IdpConfig> providers = Arrays.asList(
                         new AuthUI.IdpConfig.
                                 Builder(AuthUI.GOOGLE_PROVIDER).
                                 setPermissions(
-                                        Arrays.asList(Scopes.PROFILE, Scopes.EMAIL))
-                                .build(),
-
+                                        Arrays.asList(Scopes.PROFILE, Scopes.EMAIL)
+                                ).build(),
                         new AuthUI.IdpConfig.
                                 Builder(AuthUI.EMAIL_PROVIDER).
-                                build()
-                );
-//        startActivityForResult(
-//                AuthUI.getInstance()
-//                        .createSignInIntentBuilder()
-//                        .setProviders(providers)
-//                                Arrays.asList(new AuthUI.IdpConfig.Builder(AuthUI.EMAIL_PROVIDER).build(),
-//                                        new AuthUI.IdpConfig.Builder(AuthUI.PHONE_VERIFICATION_PROVDER).build(),
-//                                        new AuthUI.IdpConfig.Builder(AuthUI.GOOGLE_PROVIDER).build(),
-//                                        new AuthUI.IdpConfig.Builder(AuthUI.FACEBOOK_PROVIDER).build(),
-//                                        new AuthUI.IdpConfig.Builder(AuthUI.TWITTER_PROVIDER).build()))
-                //go login: Intent = new Intent...
+                                build());
+
                 Intent intent = AuthUI.
                         getInstance().
                         createSignInIntentBuilder().
                         setProviders(providers).build();
-
-                //startActivity
                 startActivityForResult(intent, RC_SIGN_IN);
+            }
+        }
+    };
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == RC_SIGN_IN){
+            IdpResponse idpResponse = IdpResponse.fromResultIntent(data);
+
+            if (resultCode == RESULT_OK){
+                //0) create a user
+                FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+                //Convert it ti a user:
+                User user = new User(currentUser);
+                //Save the User
+                //1) ref the Table.
+                DatabaseReference ref = FirebaseDatabase.getInstance().getReference("Users").child(user.getUid());
+                //2) push()   setValue
+                ref.setValue(user);
             }
 
         }
-
-
-    };
+    }
 
     @Override
     protected void onResume() {
         super.onResume();
-        mAuth.addAuthStateListener(mAuthLitener);
+        mAuth.addAuthStateListener(mAuthListener);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        mAuth.removeAuthStateListener(mAuthLitener);
+        mAuth.removeAuthStateListener(mAuthListener);
     }
 
     @Override
@@ -113,7 +117,6 @@ public class MainActivity extends AppCompatActivity {
 
         mAuth = FirebaseAuth.getInstance();
         mDatabase = FirebaseDatabase.getInstance();
-
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -127,15 +130,6 @@ public class MainActivity extends AppCompatActivity {
 
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(mViewPager);
-
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
 
     }
 
@@ -154,7 +148,6 @@ public class MainActivity extends AppCompatActivity {
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-
         switch (id) {
             case R.id.action_settings:
                 return true;
@@ -165,10 +158,6 @@ public class MainActivity extends AppCompatActivity {
 
         return super.onOptionsItemSelected(item);
     }
-
-    /**
-     * A placeholder fragment containing a simple view.
-     */
 
 
     /**

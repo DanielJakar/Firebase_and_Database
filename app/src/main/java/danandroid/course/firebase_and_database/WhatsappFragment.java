@@ -1,12 +1,12 @@
 package danandroid.course.firebase_and_database;
 
 
+import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,6 +15,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -25,14 +26,14 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
-
-import java.util.ArrayList;
-import java.util.List;
+import com.mikhaellopez.circularimageview.CircularImageView;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import butterknife.Unbinder;
+import danandroid.course.firebase_and_database.models.ChatMessage;
+import danandroid.course.firebase_and_database.models.User;
 
 
 /**
@@ -50,11 +51,6 @@ public class WhatsappFragment extends Fragment {
     RecyclerView rvChat;
     Unbinder unbinder;
 
-    public WhatsappFragment() {
-        // Required empty public constructor
-    }
-
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -62,10 +58,11 @@ public class WhatsappFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_whatsapp, container, false);
         unbinder = ButterKnife.bind(this, view);
 
+        //TODO: discuss sharedInstance.
         mDatabase = FirebaseDatabase.getInstance();
         user = FirebaseAuth.getInstance().getCurrentUser();
 
-        readOnce();
+        setupRecycler();
         return view;
     }
 
@@ -78,33 +75,42 @@ public class WhatsappFragment extends Fragment {
     @OnClick(R.id.btnSend)
     public void onBtnSendClicked() {
         String text = etMessage.getText().toString();
-        if (TextUtils.isEmpty(text))return;
+        if(TextUtils.isEmpty(text))return;
 
-//        //reference to a table MyCoolChat
+//        //reference to a Table MyCoolChat
 //        DatabaseReference chatTable = mDatabase.getReference("MyCoolChat");
 //
-//        //add a new Record: and get a reference to the new record
+//        //add a new Record: and get a reference to the new Record:
 //        DatabaseReference currentRow = chatTable.push();
 //
-//        //get the value:
+//        //set the value:
 //        currentRow.setValue(text);
 
-        mDatabase.getReference("chat").push().setValue(text);
+        ChatMessage chat = new ChatMessage(new User(user), text);
+
+
+        mDatabase.getReference("BetterChat").push().setValue(chat);
 
         etMessage.setText(null);
     }
 
-    private void setupRecycler (){
-        ChatAdapter adapter = new ChatAdapter(mDatabase.getReference("chat"));
+
+    private void setupRecycler() {
+        BetterChatAdapter adapter = new BetterChatAdapter(getContext(), mDatabase.getReference("BetterChat"));
         rvChat.setAdapter(adapter);
         rvChat.setLayoutManager(new LinearLayoutManager(getContext()));
     }
 
-    private void readFromDb (){
-        //get reference to table.
-        DatabaseReference chatRef = mDatabase.getReference("chat");
+    private void readFromDb(){
+        //1) get a ref to the table.
+        DatabaseReference chatRef = mDatabase.getReference("Chat");
         //final List<String> items = new ArrayList<>();
-        //add a listener to the table.
+        //2) add a listener to the table
+
+
+
+        //get the table at the beginning
+        //AND each time the data changes - GET ALL THE TABLE AGAIN.
         chatRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -112,7 +118,7 @@ public class WhatsappFragment extends Fragment {
 
                 for (DataSnapshot row : rows) {
                     String text = row.getValue(String.class);
-                    //items.add(text);
+                    // items.add(text);
                     Toast.makeText(getContext(), text, Toast.LENGTH_SHORT).show();
                 }
             }
@@ -123,25 +129,20 @@ public class WhatsappFragment extends Fragment {
             }
         });
     }
+
 
     private void readOnce(){
-        //get a reference to the table
-        //add a listener
+        //get a reference to the table.
+        //add a listener.
 
         //Get the data once from the server. Not updating unless we run the query again.
-        mDatabase.getReference("chat").addListenerForSingleValueEvent(new ValueEventListener() {
+        mDatabase.getReference("Chat").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                Iterable<DataSnapshot> rows = dataSnapshot.getChildren();
-
-                for (DataSnapshot row : rows) {
-                    String text = row.getValue(String.class);
-                    //items.add(text);
-                    Toast.makeText(getContext(), text, Toast.LENGTH_SHORT).show();
+                for (DataSnapshot row : dataSnapshot.getChildren()) {
+                    Toast.makeText(getContext(), row.getValue(String.class), Toast.LENGTH_SHORT).show();
                 }
-
             }
-
             @Override
             public void onCancelled(DatabaseError databaseError) {
 
@@ -149,17 +150,18 @@ public class WhatsappFragment extends Fragment {
         });
     }
 
-    private void readIncremental(){
-        mDatabase.getReference("chat").addChildEventListener(new ChildEventListener() {
 
-            //Once get aa the table:
+    private void readIncremental(){
+
+
+        mDatabase.getReference("Chat").addChildEventListener(new ChildEventListener() {
+
+            //Once get all the table:
             @Override
-            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                //Once get aa the table:
+            public void onChildAdded(DataSnapshot dataSnapshot, String key) {
+                //Once get all the table:
                 String text = dataSnapshot.getValue(String.class);
                 Toast.makeText(getContext(), text, Toast.LENGTH_SHORT).show();
-
-
                 //once a new item is added we will only get the new child
             }
 
@@ -185,17 +187,45 @@ public class WhatsappFragment extends Fragment {
         });
     }
 
-    static class ChatAdapter extends FirebaseRecyclerAdapter<String, ChatAdapter.ChatViewHolder>{
+    public static class BetterChatAdapter extends FirebaseRecyclerAdapter<ChatMessage, BetterChatAdapter.BetterChatViewHolder> {
 
+        private Context context;
+        public BetterChatAdapter(Context context, Query query) {
+            super(ChatMessage.class, R.layout.chat_item, BetterChatViewHolder.class, query);
+            this.context = context;
+        }
+
+        @Override
+        protected void populateViewHolder(BetterChatViewHolder viewHolder, ChatMessage model, int position) {
+            viewHolder.tvMessage.setText(model.getMessage());
+            viewHolder.tvSenderTime.setText(model.getSender() + " " + model.getTime());
+
+            Glide.with(context).load(model.getProfileImage()).into(viewHolder.ivProfile);
+        }
+
+        public static class BetterChatViewHolder extends RecyclerView.ViewHolder {
+            CircularImageView ivProfile;
+            TextView tvSenderTime;
+            TextView tvMessage;
+
+            public BetterChatViewHolder(View itemView) {
+                super(itemView);
+                ivProfile = (CircularImageView) itemView.findViewById(R.id.ivProfile);
+                tvSenderTime = (TextView) itemView.findViewById(R.id.tvSenderTime);
+                tvMessage = (TextView) itemView.findViewById(R.id.tvchat);
+            }
+        }
+    }
+
+
+    static class ChatAdapter extends FirebaseRecyclerAdapter<String, ChatAdapter.ChatViewHolder>{
         public ChatAdapter(Query ref) {
             super(String.class, R.layout.chat_item, ChatViewHolder.class, ref);
         }
-
         @Override
         protected void populateViewHolder(ChatViewHolder v, String text, int position) {
             v.tvchat.setText(text);
         }
-
         public static class ChatViewHolder extends RecyclerView.ViewHolder {
             TextView tvchat;
 
@@ -204,5 +234,6 @@ public class WhatsappFragment extends Fragment {
                 tvchat = (TextView) itemView.findViewById(R.id.tvchat);
             }
         }
+
     }
 }

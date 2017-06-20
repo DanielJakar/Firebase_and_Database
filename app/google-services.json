@@ -1,21 +1,21 @@
 {
   "project_info": {
-    "project_number": "139413970256",
-    "firebase_url": "https://fir-anddatabase.firebaseio.com",
-    "project_id": "fir-anddatabase",
-    "storage_bucket": "fir-anddatabase.appspot.com"
+    "project_number": "786588487254",
+    "firebase_url": "https://fir-anddatabase-797da.firebaseio.com",
+    "project_id": "fir-anddatabase-797da",
+    "storage_bucket": "fir-anddatabase-797da.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:139413970256:android:72630acfbae778b1",
+        "mobilesdk_app_id": "1:786588487254:android:72630acfbae778b1",
         "android_client_info": {
           "package_name": "danandroid.course.firebase_and_database"
         }
       },
       "oauth_client": [
         {
-          "client_id": "139413970256-re9k7mudlcnmhkehjj3b9ite8l8al8sd.apps.googleusercontent.com",
+          "client_id": "786588487254-m48k0o265nummdhoe1ntlno9v72p385c.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "danandroid.course.firebase_and_database",
@@ -23,13 +23,13 @@
           }
         },
         {
-          "client_id": "139413970256-rk7lahld9udsuu31cf97u1nvfhusqqhg.apps.googleusercontent.com",
+          "client_id": "786588487254-nkjsdbr8n94ptg7qasak18lr4n6lbkom.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyAFisDLMCAvvwE_fViK2Ichzw1Mih8KYlw"
+          "current_key": "AIzaSyDpdgfVlNk_gE6WcVYSX7fSndQsz_dHN84"
         }
       ],
       "services": {
@@ -40,7 +40,7 @@
           "status": 2,
           "other_platform_oauth_client": [
             {
-              "client_id": "139413970256-rk7lahld9udsuu31cf97u1nvfhusqqhg.apps.googleusercontent.com",
+              "client_id": "786588487254-nkjsdbr8n94ptg7qasak18lr4n6lbkom.apps.googleusercontent.com",
               "client_type": 3
             }
           ]
