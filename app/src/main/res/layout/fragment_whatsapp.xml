@@ -1,0 +1,42 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="danandroid.course.firebase_and_database.WhatsappFragment">
+
+    <!-- TODO: Update blank fragment layout -->
+
+    <EditText
+        android:id="@+id/etMessage"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_margin="8dp"
+        android:layout_toLeftOf="@+id/btnSend"
+        android:hint="Message..."
+        android:inputType="textPersonName" />
+
+    <Button
+        android:id="@+id/btnSend"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+
+        android:text="Send"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginBottom="8dp"
+        android:layout_alignTop="@+id/etMessage" />
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/rvChat"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@+id/etMessage"
+        android:layout_alignLeft="@id/etMessage"
+        android:layout_alignParentTop="true"
+        android:layout_alignRight="@id/btnSend"
+        android:layout_centerHorizontal="true"
+        android:layout_margin="8dp" />
+</RelativeLayout>
