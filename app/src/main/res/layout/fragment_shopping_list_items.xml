@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent" android:layout_height="match_parent">
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/fabAddProduct"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="50dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="16dp"
+        android:clickable="true"
+        app:fabSize="mini"
+        app:srcCompat="@drawable/ic_shopping_cart" />
+
+    <EditText
+        android:id="@+id/etProductName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginBottom="50dp"
+        android:layout_marginLeft="16dp"
+        android:layout_alignTop="@+id/fabAddProduct"
+        android:layout_toLeftOf="@+id/fabAddProduct"
+        android:ems="10"
+        android:inputType="textPersonName"
+        android:text="Name" />
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/rvProducts"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@+id/fabAddProduct"
+        android:layout_alignRight="@+id/fabAddProduct"
+        android:layout_alignEnd="@+id/fabAddProduct"
+        android:layout_alignLeft="@+id/etProductName"
+        android:layout_alignStart="@+id/etProductName"
+        android:layout_marginTop="16dp"/>
+</RelativeLayout>

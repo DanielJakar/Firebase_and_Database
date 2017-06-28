@@ -64,6 +64,11 @@ public class MainActivity extends AppCompatActivity {
                                 setPermissions(
                                         Arrays.asList(Scopes.PROFILE, Scopes.EMAIL)
                                 ).build(),
+
+                        new AuthUI.IdpConfig.
+                                Builder(AuthUI.FACEBOOK_PROVIDER).
+                                build(),
+
                         new AuthUI.IdpConfig.
                                 Builder(AuthUI.EMAIL_PROVIDER).
                                 build());
@@ -71,7 +76,8 @@ public class MainActivity extends AppCompatActivity {
                 Intent intent = AuthUI.
                         getInstance().
                         createSignInIntentBuilder().
-                        setProviders(providers).build();
+                        setLogo(R.drawable.dino_nobackground).
+                        setAvailableProviders(providers).build();
                 startActivityForResult(intent, RC_SIGN_IN);
             }
         }
@@ -83,18 +89,21 @@ public class MainActivity extends AppCompatActivity {
         if (requestCode == RC_SIGN_IN){
             IdpResponse idpResponse = IdpResponse.fromResultIntent(data);
 
+
             if (resultCode == RESULT_OK){
                 //0) create a user
                 FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
-                //Convert it ti a user:
+                //convert it to a user:
                 User user = new User(currentUser);
-                //Save the User
-                //1) ref the Table.
-                DatabaseReference ref = FirebaseDatabase.getInstance().getReference("Users").child(user.getUid());
-                //2) push()   setValue
-                ref.setValue(user);
-            }
 
+                //save the user
+                //1) ref the table.
+                DatabaseReference ref = FirebaseDatabase.getInstance().
+                        getReference("Users").child(user.getUid());
+                //2) push()... setValue
+                ref.setValue(user);
+
+            }// //else if(idpResponse!=null && idpResponse.getError)
         }
     }
 
@@ -102,6 +111,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         mAuth.addAuthStateListener(mAuthListener);
+
     }
 
     @Override
@@ -177,6 +187,8 @@ public class MainActivity extends AppCompatActivity {
             switch (position){
                 case 0:
                     return new WhatsappFragment();
+                case 1:
+                    return new ShoppingListFragment();
                 default:
                     return new Fragment();
             }
@@ -194,11 +206,14 @@ public class MainActivity extends AppCompatActivity {
                 case 0:
                     return "Chat";
                 case 1:
-                    return "SECTION 2";
+                    return "Shopping Lists";
                 case 2:
-                    return "SECTION 3";
+                    return "Blank";
             }
             return null;
         }
     }
 }
+
+//"C:\Program Files\Java\jre1.8.0_131\bin\keytool" -exportcert -aliasAndroid  "Store: C:\Users\Jakars\.android\debug.keystore" -  "Alias: AndroidDebugKey"    -  "C:\Users\Jakars\Downloads\openssl\bin\openssl" sha1 -binary | "C:\Users\Jakars\Downloads\openssl\bin\openssl" base64
+//"C:\Program Files\Java\jre1.8.0_131\bin\keytool" -exportcert -alias androiddebugkey -keystore %HOMEPATH%\.android\debug.keystore | "C:\Users\Jakars\Downloads\openssl\bin\openssl" sha1 -binary | "C:\Users\Jakars\Downloads\openssl\bin\openssl" base64
